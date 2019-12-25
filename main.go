@@ -19,7 +19,7 @@ func asyncLog(reader io.ReadCloser) error {
 		if num > 0 {
 			b := buf[:num]
 			s := strings.Split(string(b), "\n")
-			line := strings.Join(s[:len(s)-1], "\n") //取出足够一行的日志
+			line := strings.Join(s[:len(s)-1], "\n") //取出整行的日志
 			fmt.Printf("%s%s\n", cache, line)
 			cache = s[len(s)-1]
 		}
