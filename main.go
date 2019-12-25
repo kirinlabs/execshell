@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func syncLog(reader io.ReadCloser) error {
+func asyncLog(reader io.ReadCloser) error {
 	cache := "" //缓存不足一行的日志信息
-	buf := make([]byte, 1024, 1024)
+	buf := make([]byte, 1024)
 	for {
 		num, err := reader.Read(buf)
 		if err != nil && err!=io.EOF{
@@ -29,8 +29,6 @@ func syncLog(reader io.ReadCloser) error {
 
 func execute() error {
 	cmd := exec.Command("sh", "-c", "./scripts/curl.sh")
-	cmd.Output()
-	return nil
 
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
@@ -40,8 +38,8 @@ func execute() error {
 		return err
 	}
 
-	go syncLog(stdout)
-	go syncLog(stderr)
+	go asyncLog(stdout)
+	go asyncLog(stderr)
 
 	if err := cmd.Wait(); err != nil {
 		log.Printf("Error waiting for command execution: %s......", err.Error())
