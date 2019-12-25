@@ -29,6 +29,8 @@ func syncLog(reader io.ReadCloser) error {
 
 func execute() error {
 	cmd := exec.Command("sh", "-c", "./scripts/curl.sh")
+	cmd.Output()
+	return nil
 
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
