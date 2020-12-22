@@ -9,19 +9,32 @@ import (
 )
 
 func asyncLog(reader io.ReadCloser) error {
-	cache := "" //缓存不足一行的日志信息
-	buf := make([]byte, 1024)
+	bucket := make([]byte, 1024)
+	buffer := make([]byte, 100)
 	for {
-		num, err := reader.Read(buf)
-		if err != nil && err!=io.EOF{
+		num, err := reader.Read(buffer)
+		if err != nil {
+			if err == io.EOF || strings.Contains(err.Error(), "closed") {
+				err = nil
+			}
 			return err
 		}
 		if num > 0 {
-			b := buf[:num]
-			s := strings.Split(string(b), "\n")
-			line := strings.Join(s[:len(s)-1], "\n") //取出整行的日志
-			fmt.Printf("%s%s\n", cache, line)
-			cache = s[len(s)-1]
+			line := ""
+			bucket = append(bucket, buffer[:num]...)
+			tmp := string(bucket)
+			if strings.Contains(tmp, "\n") {
+				ts := strings.Split(tmp, "\n")
+				if len(ts) > 1 {
+					line = strings.Join(ts[:len(ts)-1], "\n")
+					bucket = []byte(ts[len(ts)-1]) //不够整行的以后再处理
+				} else {
+					line = ts[0]
+					bucket = bucket[:0]
+				}
+				fmt.Printf("%s\n", line)
+			}
+
 		}
 	}
 	return nil
